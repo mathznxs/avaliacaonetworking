@@ -1,0 +1,2 @@
+-- Edição 2026: nenhum limite inicial é aplicado automaticamente.
+-- A ausência de registro permite inscrições sem bloquear vagas por capacidade.

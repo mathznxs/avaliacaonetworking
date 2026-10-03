@@ -1,0 +1,3 @@
+-- Edição 2026: as atividades não possuem limite de capacidade definido.
+-- Cadastre limites em public.workshop_limits somente após a escola confirmar
+-- a capacidade de cada dia (28, 29 e 30 de setembro de 2026).

@@ -1,0 +1,2 @@
+-- This file can be used to seed initial data if needed
+-- Currently empty, but ready for future use
