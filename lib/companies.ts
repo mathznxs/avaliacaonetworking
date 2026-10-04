@@ -12,7 +12,7 @@ export const companies: Company[] = [
   { id: "yellow-blouse", name: "Yellow Blouse", className: "2D", day: 2, category: "Moda", image: "/banners/Yellow_Blouse.png" },
   { id: "nexa", name: "Nexa", className: "2D", day: 3, category: "Streetwear", image: "/banners/Nexa.png" },
   { id: "casa-esperanca", name: "Casa Esperança", className: "2D", day: 1, category: "Impacto social", image: "/banners/Casa_Esperanca.png" },
-  { id: "vila-nobre", name: "Vila Nobre", className: "2D", day: 1, category: "Alimentação", image: "/banners/Vila_Nobre.png" },
+  { id: "vila-nobre", name: "Vila Nobre", className: "2D", day: 1, category: "Alimentação", image: "/banners/Vila_Nobre.jpeg" },
   { id: "tr-reliquia", name: "TR Relíquia", className: "2D", day: 3, category: "Calçados", image: "/banners/TR_Reliquia.png" },
   { id: "gigastore", name: "GigaStore", className: "3D", day: 2, category: "Eletrônicos", image: "/banners/GigaStore.png" },
   { id: "confeitaria-zuzu", name: "Confeitaria da Zuzu", className: "3D", day: 3, category: "Confeitaria", image: "/banners/Confeitaria_Da_Zuzu.png" },

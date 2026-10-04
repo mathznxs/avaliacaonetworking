@@ -184,9 +184,8 @@ function ReviewDialog({ company, onClose, onSubmitted }: { company: Company | nu
           <form onSubmit={submit} className="mt-2 space-y-5">
             <div><label className="mb-2 block text-sm font-bold" htmlFor="reviewer-name">Seu nome</label><Input id="reviewer-name" value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={80} required placeholder="Nome e sobrenome" /></div>
             <fieldset><legend className="mb-2 text-sm font-bold">Sua nota</legend><div className="flex gap-2">{[1,2,3,4,5].map((value) => <button type="button" key={value} onClick={() => setRating(value)} aria-label={`${value} estrelas`} className="rounded-xl p-2 hover:bg-amber-50"><Star className={`h-8 w-8 ${value <= rating ? "fill-[#f4bd24] text-[#f4bd24]" : "text-slate-300"}`} /></button>)}</div></fieldset>
-            <fieldset>
-              <legend className="text-sm font-bold">Escolha uma reação positiva <span className="font-normal text-slate-400">(opcional)</span></legend>
-              <p className="mb-3 mt-1 text-sm text-slate-500">Os símbolos já vêm acompanhados de seu significado para evitar dúvidas ou interpretações inadequadas.</p>
+            <fieldset className="">
+              <legend className="text-sm font-bold pb-4">Escolha uma reação<span className="font-normal text-slate-400">(opcional)</span></legend>
               <div className="grid gap-2 sm:grid-cols-2">
                 {reactionOptions.map(({ emoji, label, description }) => {
                   const isSelected = reaction === emoji
