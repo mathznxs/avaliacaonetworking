@@ -13,7 +13,14 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
 type Summary = { companyId: string; count: number; average: number; reactions: Record<string, number> }
-const emojis = ["👏", "💡", "😍", "🚀", "🔥"]
+const classOrder = ["2C", "2D", "3C", "3D"] as const
+const reactionOptions = [
+  { emoji: "👏", label: "Muito bem!", description: "Boa apresentação e trabalho bem feito." },
+  { emoji: "💡", label: "Ideia criativa", description: "Uma proposta inteligente ou inovadora." },
+  { emoji: "😍", label: "Encantou", description: "A empresa causou uma ótima impressão." },
+  { emoji: "🚀", label: "Tem potencial", description: "A ideia pode crescer e ir ainda mais longe." },
+  { emoji: "🔥", label: "Foi destaque", description: "A empresa chamou bastante atenção na feira." },
+] as const
 
 export function EvaluationSite() {
   const [selected, setSelected] = useState<Company | null>(null)
@@ -38,6 +45,11 @@ export function EvaluationSite() {
     const matchesQuery = `${company.name} ${company.category} ${company.className}`.toLowerCase().includes(query.toLowerCase())
     return matchesQuery && (day === "all" || company.day === day)
   }), [query, day])
+
+  const groupedCompanies = useMemo(() => classOrder.map((className) => ({
+    className,
+    companies: filtered.filter((company) => company.className === className),
+  })).filter((group) => group.companies.length > 0), [filtered])
 
   const total = Object.values(summaries).reduce((sum, item) => sum + item.count, 0)
 
@@ -82,6 +94,7 @@ export function EvaluationSite() {
           <div>
             <p className="font-bold uppercase tracking-[.18em] text-[#247ba0]">17 projetos estudantis</p>
             <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Escolha uma empresa para avaliar</h2>
+            <p className="mt-2 text-slate-500">Empresas organizadas por turma: 2C, 2D, 3C e 3D.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <label className="relative"><span className="sr-only">Buscar empresa</span><Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar empresa" className="h-11 w-full bg-white pl-10 sm:w-64" /></label>
@@ -91,34 +104,53 @@ export function EvaluationSite() {
           </div>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((company) => {
-            const summary = summaries[company.id]
-            return (
-              <Card key={company.id} className="group overflow-hidden border-0 bg-white shadow-[0_14px_45px_rgba(16,27,67,.08)] transition hover:-translate-y-1">
-                <div className="relative overflow-hidden bg-slate-200">
-                  <Image src={company.image} alt={`Banner da empresa ${company.name}`} width={900} height={520} className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
-                  <div className="absolute left-3 top-3 flex gap-2"><Badge className="bg-white text-[#101b43] hover:bg-white">{company.className}</Badge><Badge className="bg-[#49c6e5] text-[#101b43] hover:bg-[#49c6e5]">{company.day}º dia</Badge></div>
+        <div className="space-y-12">
+          {groupedCompanies.map((group) => (
+            <section key={group.className} aria-labelledby={`turma-${group.className}`}>
+              <div className="mb-5 flex items-center gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#101b43] text-lg font-black text-white">{group.className}</div>
+                <div>
+                  <h3 id={`turma-${group.className}`} className="text-2xl font-black tracking-tight">Empresas da turma {group.className}</h3>
+                  <p className="text-sm text-slate-500">{group.companies.length} {group.companies.length === 1 ? "empresa disponível" : "empresas disponíveis"}</p>
                 </div>
-                <CardContent className="p-5">
-                  <p className="text-sm font-bold text-[#247ba0]">{company.category}</p>
-                  <h3 className="mt-1 text-2xl font-black tracking-tight">{company.name}</h3>
-                  <div className="mt-5 grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-3">
-                    <div><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Nota</p><p className="mt-1 flex items-center gap-1 text-lg font-black"><Star className="h-4 w-4 fill-[#f4bd24] text-[#f4bd24]" /> {summary?.count ? summary.average.toFixed(1) : "—"}</p></div>
-                    <div><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Avaliações</p><p className="mt-1 flex items-center gap-1 text-lg font-black"><MessageCircle className="h-4 w-4 text-[#49c6e5]" /> {summary?.count ?? 0}</p></div>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="flex -space-x-1 text-xl" aria-label="Reações mais usadas">{emojis.filter((emoji) => (summary?.reactions[emoji] ?? 0) > 0).slice(0, 3).map((emoji) => <span key={emoji} className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-slate-100">{emoji}</span>)}</div>
-                    <Button onClick={() => setSelected(company)} className="rounded-xl bg-[#101b43] font-bold hover:bg-[#18295f]">Avaliar empresa</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+                <div className="h-px flex-1 bg-slate-200" />
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {group.companies.map((company) => {
+                  const summary = summaries[company.id]
+                  return (
+                    <Card key={company.id} className="group overflow-hidden border-0 bg-white shadow-[0_14px_45px_rgba(16,27,67,.08)] transition hover:-translate-y-1">
+                      <div className="relative overflow-hidden bg-slate-200">
+                        <Image src={company.image} alt={`Banner da empresa ${company.name}`} width={900} height={520} className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+                        <div className="absolute left-3 top-3 flex gap-2"><Badge className="bg-white text-[#101b43] hover:bg-white">{company.className}</Badge><Badge className="bg-[#49c6e5] text-[#101b43] hover:bg-[#49c6e5]">{company.day}º dia</Badge></div>
+                      </div>
+                      <CardContent className="p-5">
+                        <p className="text-sm font-bold text-[#247ba0]">{company.category}</p>
+                        <h4 className="mt-1 text-2xl font-black tracking-tight">{company.name}</h4>
+                        <div className="mt-5 grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-3">
+                          <div><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Nota</p><p className="mt-1 flex items-center gap-1 text-lg font-black"><Star className="h-4 w-4 fill-[#f4bd24] text-[#f4bd24]" /> {summary?.count ? summary.average.toFixed(1) : "—"}</p></div>
+                          <div><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Avaliações</p><p className="mt-1 flex items-center gap-1 text-lg font-black"><MessageCircle className="h-4 w-4 text-[#49c6e5]" /> {summary?.count ?? 0}</p></div>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between gap-3">
+                          <div className="flex -space-x-1 text-xl" aria-label="Reações positivas mais usadas">
+                            {reactionOptions.filter(({ emoji }) => (summary?.reactions[emoji] ?? 0) > 0).slice(0, 3).map(({ emoji, label }) => (
+                              <span key={emoji} title={label} aria-label={label} className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-slate-100">{emoji}</span>
+                            ))}
+                          </div>
+                          <Button onClick={() => setSelected(company)} className="rounded-xl bg-[#101b43] font-bold hover:bg-[#18295f]">Avaliar empresa</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
+          {!groupedCompanies.length && <div className="rounded-3xl border border-dashed bg-white px-6 py-12 text-center text-slate-500">Nenhuma empresa encontrada com esses filtros.</div>}
         </div>
       </section>
 
-      <footer className="border-t bg-white px-4 py-8 text-center text-sm text-slate-500"><p className="font-semibold text-slate-700">1ª Feira de Empreendedorismo e Networking · E.E. Profa. Zuleika de Barros Martins Ferreira</p><p className="mt-1">Os comentários são confidenciais e usados pela organização para fins pedagógicos.</p></footer>
+      <footer className="border-t bg-white px-4 py-8 text-center text-sm text-slate-500"><p className="font-semibold text-slate-700">2ª Feira de Empreendedorismo e Networking · E.E. Profa. Zuleika de Barros Martins Ferreira</p><p className="mt-1">Os comentários são confidenciais e usados pela organização para fins pedagógicos.</p></footer>
       <ReviewDialog company={selected} onClose={() => setSelected(null)} onSubmitted={loadSummaries} />
     </main>
   )
@@ -152,7 +184,21 @@ function ReviewDialog({ company, onClose, onSubmitted }: { company: Company | nu
           <form onSubmit={submit} className="mt-2 space-y-5">
             <div><label className="mb-2 block text-sm font-bold" htmlFor="reviewer-name">Seu nome</label><Input id="reviewer-name" value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={80} required placeholder="Nome e sobrenome" /></div>
             <fieldset><legend className="mb-2 text-sm font-bold">Sua nota</legend><div className="flex gap-2">{[1,2,3,4,5].map((value) => <button type="button" key={value} onClick={() => setRating(value)} aria-label={`${value} estrelas`} className="rounded-xl p-2 hover:bg-amber-50"><Star className={`h-8 w-8 ${value <= rating ? "fill-[#f4bd24] text-[#f4bd24]" : "text-slate-300"}`} /></button>)}</div></fieldset>
-            <fieldset><legend className="mb-2 text-sm font-bold">Uma reação <span className="font-normal text-slate-400">(opcional)</span></legend><div className="flex gap-2">{emojis.map((emoji) => <button type="button" key={emoji} onClick={() => setReaction(reaction === emoji ? "" : emoji)} className={`grid h-12 w-12 place-items-center rounded-xl border text-2xl ${reaction === emoji ? "border-[#247ba0] bg-cyan-50" : "bg-white"}`}>{emoji}</button>)}</div></fieldset>
+            <fieldset>
+              <legend className="text-sm font-bold">Escolha uma reação positiva <span className="font-normal text-slate-400">(opcional)</span></legend>
+              <p className="mb-3 mt-1 text-sm text-slate-500">Os símbolos já vêm acompanhados de seu significado para evitar dúvidas ou interpretações inadequadas.</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {reactionOptions.map(({ emoji, label, description }) => {
+                  const isSelected = reaction === emoji
+                  return (
+                    <button type="button" key={emoji} onClick={() => setReaction(isSelected ? "" : emoji)} aria-pressed={isSelected} aria-label={`${label}: ${description}`} className={`flex min-h-20 items-center gap-3 rounded-2xl border p-3 text-left transition ${isSelected ? "border-[#247ba0] bg-cyan-50 ring-2 ring-[#247ba0]/15" : "bg-white hover:border-slate-300 hover:bg-slate-50"}`}>
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-2xl shadow-sm" aria-hidden="true">{emoji}</span>
+                      <span><strong className="block text-sm text-slate-900">{label}</strong><span className="mt-0.5 block text-xs leading-snug text-slate-500">{description}</span></span>
+                    </button>
+                  )
+                })}
+              </div>
+            </fieldset>
             <div><label className="mb-2 block text-sm font-bold" htmlFor="review-comment">Comentário</label><Textarea id="review-comment" value={comment} onChange={(event) => setComment(event.target.value)} minLength={3} maxLength={1000} required rows={5} placeholder="O que chamou sua atenção? O que pode melhorar?" /></div>
             {status === "error" && <p className="text-sm font-semibold text-red-600">Não foi possível enviar agora. Tente novamente.</p>}
             <Button type="submit" disabled={status === "sending" || rating === 0} className="h-12 w-full rounded-xl bg-[#101b43] text-base font-bold">{status === "sending" ? "Enviando…" : "Enviar avaliação"}</Button>
