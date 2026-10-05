@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { companyIds, companies } from "@/lib/companies"
+import { allowedReactionEmojis } from "@/lib/reactions"
 import { createAuthorizedClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
-const allowedReactions = new Set(["👏", "💡", "😍", "🚀", "🔥"])
 
 type ReviewRow = { company_id: string; rating: number; reaction: string | null; votes: number }
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   const comment = body?.comment?.trim() ?? ""
   const rating = Number(body?.rating)
   const reaction = body?.reaction || null
-  if (!companyIds.has(companyId) || name.length < 2 || name.length > 80 || comment.length < 3 || comment.length > 1000 || !Number.isInteger(rating) || rating < 1 || rating > 5 || (reaction && !allowedReactions.has(reaction))) {
+  if (!companyIds.has(companyId) || name.length < 2 || name.length > 80 || comment.length < 3 || comment.length > 1000 || !Number.isInteger(rating) || rating < 1 || rating > 5 || (reaction && !allowedReactionEmojis.has(reaction))) {
     return NextResponse.json({ error: "Confira os dados da avaliação." }, { status: 400 })
   }
   const { error } = await createAuthorizedClient().from("company_reviews").insert({ company_id: companyId, reviewer_name: name, comment, rating, reaction })
